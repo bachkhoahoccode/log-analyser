@@ -1,0 +1,13 @@
+LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+You can find a full list of fields in the Apache log documentation. We recommend using at least the following five fields, as they’re important for monitoring server health and troubleshooting issues:
+
+%>s—The HTTP status code for the request. This shows the final request status after any internal redirection; for the original status, use %s
+%U—The URL path requested, excluding any additional URL parameters such as a query string
+%a—The IP address of the client making the request. This is useful for identifying traffic from a particular source
+%T—How long it took to process the request in seconds. This is useful for measuring the speed of your site. Use %D to make the same measurement in microseconds
+%{UNIQUE_ID}e—Also commonly known as the request ID, this logs a unique identifier with each request. This is useful for tracing a request from Apache to your web application server
+
+listener listen in background
+taker triggered when file sent to system
+each run separate threads
+should i look into how to upload file?
