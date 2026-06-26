@@ -1,2 +1,14 @@
+
+# ==========================================
+# Required Libraries
+# ==========================================
+
+# Data parsing and manipulation:
+pandas>=2.0.0
+numpy>=1.24.0
 regex
-python 3.9 ++
+
+# Visualization libraries:
+matplotlib>=3.7.0
+seaborn>=0.12.0
+streamlit>=1.20.0

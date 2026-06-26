@@ -1,0 +1,17 @@
+{
+  "window": {
+    "second_buckets": 300,
+    "short_window_seconds": 5,
+    "medium_window_seconds": 60,
+    "long_window_seconds": 300
+  },
+
+  "storage": {
+    "minute_summary_retention_days": 30,
+    "ladder_export_interval": 60
+  },
+
+  "risk": {
+    "alert_threshold": 50
+  }
+}

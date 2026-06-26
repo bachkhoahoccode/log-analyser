@@ -1,0 +1,62 @@
+{
+  "apache_clf": {
+    "regex": "^(?P<ip>\\S+) \\S+ \\S+ \\[(?P<time>.*?)\\] \\\"(?P<method>\\S+) (?P<uri>.*?) (?P<protocol>.*?)\\\" (?P<status>\\d+) (?P<bytes>\\S+)$",
+    "time_field": "time",
+    "time_format": "%d/%b/%Y:%H:%M:%S %z",
+    "numeric_fields": [
+      "status",
+      "bytes"
+    ],
+    "dash_as_zero": [
+      "bytes"
+    ],
+    "optional_fields": [],
+    "request_fields": [
+      "method",
+      "uri",
+      "protocol"
+    ]
+  },
+  "apache_combined": {
+    "regex": "^(?P<ip>\\S+) \\S+ \\S+ \\[(?P<time>.*?)\\] \\\"(?P<method>\\S+) (?P<uri>.*?) (?P<protocol>.*?)\\\" (?P<status>\\d+) (?P<bytes>\\S+) \\\"(?P<referer>.*?)\\\" \\\"(?P<user_agent>.*?)\\\"$",
+    "time_field": "time",
+    "time_format": "%d/%b/%Y:%H:%M:%S %z",
+    "numeric_fields": [
+      "status",
+      "bytes"
+    ],
+    "dash_as_zero": [
+      "bytes"
+    ],
+    "optional_fields": [
+      "referer",
+      "user_agent"
+    ],
+    "request_fields": [
+      "method",
+      "uri",
+      "protocol"
+    ]
+  },
+  "nginx_combined": {
+    "regex": "^(?P<ip>\\S+) - (?P<user>\\S+) \\[(?P<time>.*?)\\] \\\"(?P<method>\\S+) (?P<uri>.*?) (?P<protocol>.*?)\\\" (?P<status>\\d+) (?P<bytes>\\d+) \\\"(?P<referer>.*?)\\\" \\\"(?P<user_agent>.*?)\\\"$",
+    "time_field": "time",
+    "time_format": "%d/%b/%Y:%H:%M:%S %z",
+    "numeric_fields": [
+      "status",
+      "bytes"
+    ],
+    "dash_as_zero": [
+      "bytes"
+    ],
+    "optional_fields": [
+      "referer",
+      "user_agent"
+    ],
+    "request_fields": [
+      "method",
+      "uri",
+      "protocol"
+    ]
+  }
+}
