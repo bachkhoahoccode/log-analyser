@@ -1,0 +1,12 @@
+{
+    "log_sources": [
+        {
+            "log_file_path": "link1",
+            "format": "form1"
+        },
+        {
+            "log_file_path": "path2",
+            "format": "form2"
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "trigger": "rollup",
+  "metric": "failed_login_by_ip",
+
+  "rules": {
+    "short": {
+      "threshold": 8,
+      "risk": 30
+    },
+    "medium": {
+      "threshold": 30,
+      "risk": 20
+    },
+    "long": {
+      "threshold": 100,
+      "risk": 10
+    }
+  }
+}

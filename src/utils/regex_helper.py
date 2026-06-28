@@ -23,23 +23,22 @@ PATTERNS = {
 }
 
 
-def detect_log_format(file_path, formats, sample_size=100):
+def detect_log_format(lines, formats, sample_size=100):
 
     scores = defaultdict(int)
     total_lines = 0
-
-    with open(file_path, encoding="utf-8", errors="ignore") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            total_lines += 1
-            for name, spec in formats.items():
-                regex = spec["regex"]
-                if regex.match(line):
-                    scores[name] += 1
-            if total_lines >= sample_size:
-                break
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        total_lines += 1
+        for name, spec in formats.items():
+            regex = spec["regex"]
+            if re.match(regex,line):
+                scores[name] += 1
+        if total_lines >= sample_size:
+            break
 
     if total_lines == 0:
         return None
@@ -47,9 +46,9 @@ def detect_log_format(file_path, formats, sample_size=100):
     best_format = max(scores, key=scores.get, default=None)
     if best_format is None:
         return None
-
-    return {
+    return best_format
+    '''return {
         "format": best_format,
         "confidence": scores[best_format] / total_lines,
         "matches": dict(scores)
-    }
+    }'''

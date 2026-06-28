@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "trigger": "rollup",
+  "metric": "requests_by_ip",
+
+  "rules": {
+    "short": {
+      "threshold": 500,
+      "risk": 60
+    },
+    "medium": {
+      "threshold": 3000,
+      "risk": 40
+    },
+    "long": {
+      "threshold": 12000,
+      "risk": 20
+    }
+  }
+}

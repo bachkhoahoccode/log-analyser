@@ -1,4 +1,12 @@
+from typing import Optional, Tuple, Dict, Any
 from datetime import datetime
+import json
+
+try:
+    with open("log_formats.json", "r") as config_file:
+        LOG_FORMATS = json.load(config_file)
+except FileNotFoundError:
+    LOG_FORMATS = {}
 
 
 class RegexParser:
@@ -7,7 +15,7 @@ class RegexParser:
         self.spec = spec
         self.pattern = spec["regex"]
 
-    def parse_line(self, line):
+    def parse_line(self, line)-> Optional[Tuple[int, Dict[str, Any]]]:
         match = self.pattern.match(line)
         if not match:
             return None
@@ -20,7 +28,10 @@ class RegexParser:
 
     def _parse_timestamp(self, event):
         field = self.spec["time_field"]
-        unix_ts = int(datetime.strptime(event[field], self.spec["time_format"]).timestamp())
+        format = self.spec["time_format"]
+        unix = int(datetime.strptime(event[field], format).timestamp())
+        unix_ts = unix // 10**(len(unix)-10)
+
         del event[field]
         return unix_ts
 
@@ -48,3 +59,13 @@ class RegexParser:
         event["method"] = parts[0]
         event["path"] = parts[1]
         event["protocol"] = parts[2]
+
+if __name__ == "__main__":
+    #example logs:
+
+    file_path = input("Enter the path to the log file: ")
+    with open(file_path, 'r', encoding='utf-8') as file:
+        parsertype = "apache"
+        parser = RegexParser("apache") #not working, placeholder
+        parsed = parser.parse_line(file)
+    print(json.dumps(parsed, indent=2, ensure_ascii=False))

@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "trigger": "rollup",
+  "metric": "user_agent_by_ip",
+
+  "rules": {
+    "short": {
+      "distinct_threshold": 3,
+      "risk": 20
+    },
+    "medium": {
+      "distinct_threshold": 5,
+      "risk": 15
+    },
+    "long": {
+      "distinct_threshold": 8,
+      "risk": 10
+    }
+  }
+}

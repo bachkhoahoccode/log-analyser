@@ -13,7 +13,7 @@ KNOWN_FORMATS = [
     "%Y%m%d%H%M%S",
 ]
 
-def find_timestamp_format(ts_str: str) -> str:
+def find_timestamp_format(ts_str: str, formats) -> str:
 
      # ISO Z fix
     if ts_str.endswith("Z"):
@@ -34,7 +34,7 @@ def find_timestamp_format(ts_str: str) -> str:
 
         return "unix_unknown"
 
-    for fmt in KNOWN_FORMATS:
+    for fmt in formats:
         try:
             dt = datetime.strptime(ts_str, fmt)
             return fmt

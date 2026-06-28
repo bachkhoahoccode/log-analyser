@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "trigger": "event",
+  "field": "path",
+
+  "patterns": [
+    "<script",
+    "%3cscript",
+    "javascript:",
+    "onerror=",
+    "onload=",
+    "<img",
+    "<svg",
+    "alert("
+  ],
+
+  "risk": 30
+}

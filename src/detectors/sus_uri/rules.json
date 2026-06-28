@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "trigger": "event",
+  "field": "path",
+
+  "watchlist": [
+    "/admin",
+    "/wp-admin",
+    "/phpmyadmin",
+    "/server-status",
+    "/.env",
+    "/.git",
+    "/.git/config",
+    "/backup",
+    "/config.php"
+  ],
+
+  "risk": 15
+}
