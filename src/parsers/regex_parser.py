@@ -1,6 +1,7 @@
 from typing import Optional, Tuple, Dict, Any
 from datetime import datetime
 import json
+import re
 
 try:
     with open("log_formats.json", "r") as config_file:
@@ -13,7 +14,7 @@ class RegexParser:
 
     def __init__(self, spec):
         self.spec = spec
-        self.pattern = spec["regex"]
+        self.pattern = re.compile(spec["regex"])
 
     def parse_line(self, line)-> Optional[Tuple[int, Dict[str, Any]]]:
         match = self.pattern.match(line)
@@ -30,7 +31,7 @@ class RegexParser:
         field = self.spec["time_field"]
         format = self.spec["time_format"]
         unix = int(datetime.strptime(event[field], format).timestamp())
-        unix_ts = unix // 10**(len(unix)-10)
+        unix_ts = unix // 10**(len(str(unix))-10)
 
         del event[field]
         return unix_ts

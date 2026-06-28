@@ -4,9 +4,9 @@ from pathlib import Path
 RULE = json.loads((Path(__file__).parent/"rules.json").read_text())
 
 
-async def detect(tsevent):
+def detect(tsevent):
     ts, event = tsevent
-    text = text = event[RULE["field"]].lower()
+    text = str(event.get(RULE["field"])).lower()
     for pattern in RULE["patterns"]:
         if pattern.lower() in text:
             return [{

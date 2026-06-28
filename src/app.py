@@ -6,7 +6,7 @@ import streamlit as st
 from utils.listener import LogListener
 from indexer.aggregator import AggregatorCache
 from parsers.master_parser import MasterParser
-from utils.history_processor import historical_processor_loop
+from history.history_processor import historical_processor_loop
 from dashboard.config_sidebar import render_sidebar
 from dashboard.charts import render_charts          # ← shared chart engine
 from dashboard.file_loader import render_file_loader

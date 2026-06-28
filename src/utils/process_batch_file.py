@@ -3,7 +3,7 @@ from parsers.master_parser import ParserFactory
 from indexer.aggregator import AggregatorCache
 from indexer.secondbucket import SecondBucket
 from detectors.master_detector import MasterDetector
-from indexer.metric import Metric
+from indexer.metric import METRICS
 
 def process_batch_file(uploaded_file, format):
     detector = MasterDetector(None, "data/batch.jsonl")
@@ -16,22 +16,22 @@ def process_batch_file(uploaded_file, format):
         st.error(f"Failed to read file encoding: {e}")
         return None
     alerts = []
-    metrics = {}
+    metrics = []
     for line in raw_lines:
         if not line.strip():
             continue
-        parsed = parser.parse_line(line)#parsed
+        parsed = parser.parse_line(line)#parsed is tuple
         for detective in detector.event_detectors:
             event_alert = detective.detect(parsed)
             if event_alert: alerts + event_alert
         roll_alert, roll_metrics = ingest_event(cache, parsed)
         if roll_alert: alerts + roll_alert
-        if roll_metrics: Metric.aggregate_event(metrics, roll_metrics)
+        if roll_metrics: metrics.append(roll_metrics)
     return metrics, alerts
 
-
-def ingest_event(cache, event):
-    event_sec = event["timestamp"]
+def ingest_event(cache, tsevent):
+    event_sec = tsevent[0]
+    event = tsevent[1]
     alerts = []
     metrics = None
     # Handle chronological progression
@@ -50,14 +50,8 @@ def ingest_event(cache, event):
         cache.current_bucket = SecondBucket(event_sec)
     # active second bucket
     if event_sec == cache.current_event_time:
-        
-        cache.aggregate(cache.current_bucket, event)
-    else:
-        # out-of-order data, recalculate summary
-        for window in cache.windows.values():
-            for bucket in window.history:
-                if bucket.timestamp == event_sec:
-                    cache.aggregate(bucket, event)
-                    window.summarize()
-                    break
+        cache.current_bucket.request_count += 1
+        cache.current_bucket.total_bytes += event.get("total_bytes", 0)
+        for metric in METRICS.values():
+            metric.aggregate_metric(cache.current_bucket.__dict__, event)
     return alerts, metrics

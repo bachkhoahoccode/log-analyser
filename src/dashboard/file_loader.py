@@ -14,7 +14,7 @@ def _load_available_formats(config_path: str = "data/regex_log_formats.json") ->
     return {}
 
 
-def _save_formats(formats: dict, config_path: str = "config/log_formats.json"):
+def _save_formats(formats: dict, config_path: str = "data/regex_log_formats.json"):
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
     with open(config_path, "w", encoding="utf-8") as f:
         json.dump(formats, f, indent=4)
@@ -70,13 +70,16 @@ def render_file_loader():
     # ── Format detection ─────────────────────────────────────────────
     from utils.regex_helper import detect_log_format
     from utils.time_helper  import find_timestamp_format, KNOWN_FORMATS
-    import re
-    sample_line    = preview_lines[0:10]
-    detected_regex = detect_log_format(sample_line, formats_dict)
-    ts = (m := re.search(detected_regex, str("timestamp"))) and m.group()
+    sample_line    = preview_lines[:10]
+    result  = detect_log_format(sample_line, formats_dict)
+    if result is None:
+        st.error("Unknown log structure.")
+        return
+    detected_format = result["name"]
+    ts = result["timestamp"]
     try:
         detected_time  = find_timestamp_format(ts, KNOWN_FORMATS)
-    except AttributeError:
+    except ValueError:
         st.error(
                     "File refused: could not isolate recognisable log syntax "
                     "or timestamp markers."
@@ -86,8 +89,8 @@ def render_file_loader():
     if selected_format != "Auto-Detect & Verify":
         # User picked a specific format — verify it matches
         expected = formats_dict.get(selected_format, {})
-        if (detected_regex == expected.get("regex") and
-                detected_time  == expected.get("time_format")):
+        if (detected_format == selected_format and
+                detected_time == expected.get("time_format")):
             st.success(f"✅ Verified — file matches '{selected_format}'.")
             resolved_format = selected_format
         else:
@@ -99,22 +102,20 @@ def render_file_loader():
 
     else:
         # Auto-detect: try to match against known formats
-        for name, cfg in formats_dict.items():
-            if (cfg.get("regex")       == detected_regex and
-                    cfg.get("time_format") == detected_time):
-                st.success(f"✅ Auto-detected format: '{name}'")
-                resolved_format = name
-                break
+        cfg = formats_dict[detected_format]
+        if cfg.get("time_format") == detected_time:
+            st.success(f"✅ Auto-detected format: '{detected_format}'")
+            resolved_format = detected_format
 
         if resolved_format is None:
-            if detected_regex and detected_time:
+            if detected_format and detected_time:
                 # New combination — ask the user to name it
                 st.warning(
                     "Structure recognised, but this Regex + Timestamp "
                     "combination is not yet registered."
                 )
                 st.session_state._pending_format = {
-                    "regex":       detected_regex,
+                    "regex":       formats_dict[detected_format]["regex"],
                     "time_format": detected_time,
                     "file":        uploaded_file,    # keep reference
                 }

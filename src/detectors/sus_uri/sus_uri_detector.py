@@ -2,9 +2,9 @@ import json
 from pathlib import Path
 RULE = json.loads((Path(__file__).parent/"rules.json").read_text())
 
-async def detect(tsevent):
+def detect(tsevent):
     ts, event = tsevent
-    path = text = event[RULE["field"]].lower()
+    path = str(event.get(RULE["field"])).lower()
     for target in RULE["watchlist"]:
         if target in path:
             return [{

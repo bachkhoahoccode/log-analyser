@@ -1,0 +1,211 @@
+{
+  "apache_clf": {
+    "regex": "^(?P<ip>\\S+) \\S+ \\S+ \\[(?P<time>.*?)\\] \\\"(?P<method>\\S+) (?P<uri>.*?) (?P<protocol>.*?)\\\" (?P<status>\\d+) (?P<bytes>\\S+)$",
+    "time_field": "time",
+    "time_format": "%d/%b/%Y:%H:%M:%S %z",
+    "numeric_fields": ["status", "bytes"],
+    "dash_as_zero": ["bytes"],
+    "optional_fields": [],
+    "request_fields": ["method", "uri", "protocol"]
+  },
+  "apache_combined": {
+    "regex": "^(?P<ip>\\S+) \\S+ \\S+ \\[(?P<time>.*?)\\] \\\"(?P<method>\\S+) (?P<uri>.*?) (?P<protocol>.*?)\\\" (?P<status>\\d+) (?P<bytes>\\S+) \\\"(?P<referer>.*?)\\\" \\\"(?P<user_agent>.*?)\\\"$",
+    "time_field": "time",
+    "time_format": "%d/%b/%Y:%H:%M:%S %z",
+    "numeric_fields": ["status", "bytes"],
+    "dash_as_zero": ["bytes"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["method", "uri", "protocol"]
+  },
+  "nginx_combined": {
+    "regex": "^(?P<ip>\\S+) - (?P<user>\\S+) \\[(?P<time>.*?)\\] \\\"(?P<method>\\S+) (?P<uri>.*?) (?P<protocol>.*?)\\\" (?P<status>\\d+) (?P<bytes>\\d+) \\\"(?P<referer>.*?)\\\" \\\"(?P<user_agent>.*?)\\\"$",
+    "time_field": "time",
+    "time_format": "%d/%b/%Y:%H:%M:%S %z",
+    "numeric_fields": ["status", "bytes"],
+    "dash_as_zero": ["bytes"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["method", "uri", "protocol"]
+  },
+
+  "apache_flexible_iso_ms": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%dT%H:%M:%S.%f%z",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "apache_flexible_iso": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%dT%H:%M:%S%z",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "apache_flexible_space": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%d %H:%M:%S",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "apache_flexible_space_ms": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%d %H:%M:%S.%f",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "apache_flexible_space_comma": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%d %H:%M:%S,%f",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "apache_flexible_clf": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%d/%b/%Y:%H:%M:%S %z",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "apache_flexible_syslog": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%b %d %H:%M:%S",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "apache_flexible_rfc2822": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%a, %d %b %Y %H:%M:%S %z",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "apache_flexible_slash": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y/%m/%d %H:%M:%S",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "apache_flexible_compact": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y%m%d%H%M%S",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+
+  "nginx_flexible_iso_ms": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%dT%H:%M:%S.%f%z",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "nginx_flexible_iso": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%dT%H:%M:%S%z",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "nginx_flexible_space": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%d %H:%M:%S",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "nginx_flexible_space_ms": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%d %H:%M:%S.%f",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "nginx_flexible_space_comma": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y-%m-%d %H:%M:%S,%f",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "nginx_flexible_clf": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%d/%b/%Y:%H:%M:%S %z",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "nginx_flexible_syslog": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%b %d %H:%M:%S",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "nginx_flexible_rfc2822": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%a, %d %b %Y %H:%M:%S %z",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "nginx_flexible_slash": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y/%m/%d %H:%M:%S",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  },
+  "nginx_flexible_compact": {
+    "regex": "^(?P<ip>\\S+) (?P<identd>\\S+) (?P<userid>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \\\"(?P<request>[^\\\"]*)\\\" (?P<status>\\d{3}) (?P<size>\\S+)(?: \\\"(?P<referer>[^\"]*)\\\" \\\"(?P<user_agent>[^\"]*)\\\")?$",
+    "time_field": "timestamp",
+    "time_format": "%Y%m%d%H%M%S",
+    "numeric_fields": ["status", "size"],
+    "dash_as_zero": ["size"],
+    "optional_fields": ["referer", "user_agent"],
+    "request_fields": ["request"]
+  }
+}

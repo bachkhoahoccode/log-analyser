@@ -24,31 +24,27 @@ PATTERNS = {
 
 
 def detect_log_format(lines, formats, sample_size=100):
-
     scores = defaultdict(int)
-    total_lines = 0
-    
+    first_match = {}
+    total = 0
     for line in lines:
         line = line.strip()
         if not line:
             continue
-        total_lines += 1
+        total += 1
         for name, spec in formats.items():
-            regex = spec["regex"]
-            if re.match(regex,line):
+            m = re.match(spec["regex"], line)
+            if m:
                 scores[name] += 1
-        if total_lines >= sample_size:
+                if name not in first_match:
+                    first_match[name] = (spec["time_format"], m)
+        if total >= sample_size:
             break
 
-    if total_lines == 0:
+    if not scores:
         return None
-
-    best_format = max(scores, key=scores.get, default=None)
-    if best_format is None:
-        return None
-    return best_format
-    '''return {
-        "format": best_format,
-        "confidence": scores[best_format] / total_lines,
-        "matches": dict(scores)
-    }'''
+    best = max(scores, key=scores.get)
+    return {
+        "name": best,
+        "timestamp" : first_match[best][1].group(formats[best]["time_field"]),
+    }

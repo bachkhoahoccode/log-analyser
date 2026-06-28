@@ -21,7 +21,7 @@ class AggregatorCache:
     async def ingest_event(self, max_window):
         while self.inqueue:
             event = await self.inqueue.get()
-            event_sec = event["timestamp"]
+            event_sec = event.timestamp
 
             # corrupted ts in flow
             if self.current_event_time - event_sec > max_window:
@@ -54,16 +54,16 @@ class AggregatorCache:
 
     def aggregate(self, bucket, event):
         bucket.request_count += 1
-        bucket.total_bytes += event["bytes"]
+        bucket.total_bytes += event.total_bytes
         for metric in METRICS.values():
-            metric.aggregate_event(bucket, event)
+            metric.aggregate_metric(bucket.__dict__, event._dict_)
 
     def _write_window_to_history(self):
         history_window = next((w for w in self.windows.values() if w.export_history), None)
         if history_window:
             payload = {
                 "timestamp": self.current_event_time,
-                "metrics": dict(history_window.summary) # Cast defaultdict to plain dict
+                "metrics": history_window.summary.__dict__ # Cast defaultdict to plain dict
             }
             
             print(f"[LADDER] Minute boundary reached. Exporting '1m' window state...")

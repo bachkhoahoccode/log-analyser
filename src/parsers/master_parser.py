@@ -14,9 +14,18 @@ class BaseParser(ABC):
         pass
 
 class ParserFactory:
-    @staticmethod
-    def create(format_name, log_formats_config):  # Truyền cấu hình vào đây
-        spec = log_formats_config.get(format_name)
+    _formats = None
+
+    @classmethod
+    def formats(cls):
+        if cls._formats is None:
+            with open("config/regex_log_formats.json", "r") as f:
+                cls._formats = json.load(f)
+        return cls._formats
+
+    @classmethod
+    def create(cls, format_name):  # Truyền cấu hình vào đây
+        spec = cls.formats().get(format_name)
         if spec is None:
             raise ValueError(f"Unknown format: {format_name}")
         
