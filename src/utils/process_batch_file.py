@@ -23,13 +23,13 @@ def process_batch_file(uploaded_file, format):
         parsed = parser.parse_line(line)#parsed is tuple
         for detective in detector.event_detectors:
             event_alert = detective.detect(parsed)
-            if event_alert: alerts + event_alert
-        roll_alert, roll_metrics = ingest_event(cache, format, parsed)
-        if roll_alert: alerts + roll_alert
+            if event_alert: alerts += event_alert
+        roll_alert, roll_metrics = ingest_event(cache, parsed)
+        if roll_alert: alerts += roll_alert
         if roll_metrics: metrics.append(roll_metrics)
     return metrics, alerts
 
-def ingest_event(cache, format, tsevent):
+def ingest_event(cache, tsevent):
     event_sec = tsevent[0]
     event = build(tsevent)
     alerts = []

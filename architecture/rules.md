@@ -1,5 +1,5 @@
 ```mermaid
-%%{init: {"theme": "default"}}%%
+%%{init: { "theme": "default", "themeCSS": "svg { background: white !important; }" }}%%
 
 graph LR
 
