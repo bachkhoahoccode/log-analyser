@@ -2,19 +2,18 @@ import json
 import os
 import streamlit as st
 
-
 # ======================================================================
 # HELPERS
 # ======================================================================
 
-def _load_available_formats(config_path: str = "data/regex_log_formats.json") -> dict:
+def _load_available_formats(config_path: str = "config/regex_log_formats.json") -> dict:
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
 
-def _save_formats(formats: dict, config_path: str = "data/regex_log_formats.json"):
+def _save_formats(formats: dict, config_path: str = "config/regex_log_formats.json"):
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
     with open(config_path, "w", encoding="utf-8") as f:
         json.dump(formats, f, indent=4)
@@ -23,11 +22,11 @@ def _save_formats(formats: dict, config_path: str = "data/regex_log_formats.json
 def _dispatch_to_parser(uploaded_file, format_name: str) -> dict:
     from utils.process_batch_file import process_batch_file   
     with st.spinner("Processing batch log files..."): 
-        result = process_batch_file(uploaded_file, format_name)       
-
-    if "metrics" not in result:
-        result = {"metrics": result, "alerts": []}
-    return result
+        alerts, metrics = process_batch_file(uploaded_file, format_name)       
+    return {
+        "metrics": metrics, 
+        "alerts": alerts
+    }
 
 
 # ======================================================================

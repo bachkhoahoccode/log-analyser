@@ -51,11 +51,11 @@ class MasterParser:
             await self.outqueue.put(event)
 
     def build(self, event):
-        bucket = SecondBucket(event["timestamp"])
+        bucket = SecondBucket(event[0])
         bucket.request_count = 1
-        bucket.total_bytes = event.get("bytes", 0)
+        bucket.total_bytes = event[1].get("bytes", 0)
         for metric in METRICS.values():
-            value = metric.extractor(event)
+            value = metric.extractor(event[1])
             if value is None:
                 continue
             storage = getattr(bucket, metric.name)
@@ -68,6 +68,39 @@ class MasterParser:
                 if outer is not None and inner is not None:
                     storage[outer][inner] += amount
         return bucket
+    
+def build(event):
+    # event[0] là timestamp, event[1] là dict chứa data của log đó
+    timestamp, event_data = event[0], event[1]
+
+    bucket = SecondBucket(timestamp)
+    bucket.request_count = 1
+    bucket.total_bytes = event_data.get("bytes", 0)
+    
+    for metric in METRICS.values():
+        value = metric.extractor(event_data)
+        if value is None:
+            continue
+        storage = getattr(bucket, metric.name) #empty dict 
+        if metric.method == "direct":
+            if isinstance(value, tuple) and len(value) == 2:
+                key, amount = value
+                if key is not None:
+                    storage[key] = amount
+            else:
+                print(f"WARNING: Metric {metric.name} (direct) trả về sai tuple 2 phần tử: {value}")
+        elif metric.method == "nested":
+            if isinstance(value, tuple) and len(value) == 3:
+                outer, inner, amount = value
+                if outer is not None and inner is not None:
+                    if outer not in storage:
+                        storage[outer] = {}
+                    storage[outer][inner] = amount
+            else:
+                print(f"WARNING: Metric {metric.name} (nested) trả về sai tuple 3 phần tử: {value}")
+    return bucket
+
+
 
 if __name__ == "__main__":
     try:

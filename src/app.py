@@ -119,8 +119,8 @@ def render_batch_tab():
 
     st.markdown("---")
 
-    # batch_data is {"metrics": <aggregated dict>, "alerts": <list>}
-    batch_metrics = st.session_state.batch_data.get("metrics", {})
+    # batch_data is {"metrics": list<aggregated dict>, "alerts": <list>}
+    batch_metrics = st.session_state.batch_data.get("metrics", [])
     batch_alerts  = st.session_state.batch_data.get("alerts",  [])
     render_charts(batch_metrics, batch_alerts)
 
