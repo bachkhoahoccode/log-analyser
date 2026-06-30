@@ -1,24 +1,11 @@
-"""
-risk_scoring.py — Alert enrichment and aggregation engine.
-
-Responsibilities:
-  - Score an individual alert payload
-  - Accumulate repeated alerts (same fingerprint) into a group
-  - Derive the begin/end time window from a group
-  - Produce the final enriched dict that history_processor writes to disk
-
-history_processor.py is the only caller; it owns I/O and dedup state.
-"""
-
 from collections import defaultdict
 
 
 # ======================================================================
-# FINGERPRINT  (shared key format — import this wherever you need it)
+# FINGERPRINT
 # ======================================================================
 
 def make_fingerprint(alert_content: dict) -> str:
-    """Stable string key that identifies a logical alert, not an individual event."""
     ip   = alert_content.get("ip",   "unknown")
     kind = alert_content.get("type", "generic")
     return f"{ip}-{kind}"
@@ -29,10 +16,7 @@ def make_fingerprint(alert_content: dict) -> str:
 # ======================================================================
 
 def calculate_severity_score(alert_content: dict) -> int:
-    """
-    Derive a 0-100 risk score from a single alert payload.
-    Extend the rules here without touching the processor loop.
-    """
+
     score = 10  # baseline
 
     if "critical" in str(alert_content).lower():
@@ -49,19 +33,6 @@ def calculate_severity_score(alert_content: dict) -> int:
 # ======================================================================
 
 class AlertGroupAccumulator:
-    """
-    Tracks every occurrence of each fingerprint seen in the current
-    processor wake cycle so we can derive begin/end windows and a
-    consolidated score across repeated events.
-
-    Typical lifecycle (one wake cycle):
-        acc = AlertGroupAccumulator()
-        for raw_alert in buffered_alerts:
-            acc.add(raw_alert)
-        for enriched in acc.enriched_alerts():
-            write_to_file(enriched)
-        acc.clear()
-    """
 
     def __init__(self):
         # fingerprint -> list of raw alert dicts (preserves insertion order)
@@ -74,10 +45,6 @@ class AlertGroupAccumulator:
         self._groups[fingerprint].append(raw_alert)
 
     def enriched_alerts(self):
-        """
-        Yield one enriched dict per unique fingerprint.
-        The dict is ready to be serialised and appended to history.
-        """
         for fingerprint, occurrences in self._groups.items():
             yield _build_enriched_alert(fingerprint, occurrences)
 

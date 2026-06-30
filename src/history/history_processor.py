@@ -5,10 +5,6 @@ import os
 from .risk_score import AlertGroupAccumulator, make_fingerprint
 from .temporal_aggregator import TemporalAggregator
 
-# ======================================================================
-# FILE HELPERS
-# ======================================================================
-
 def read_and_clear_buffer(path: str) -> list[str]:
     if not os.path.exists(path) or os.path.getsize(path) == 0:
         return []
@@ -22,10 +18,6 @@ def read_and_clear_buffer(path: str) -> list[str]:
 def append_to_history(path: str, data: dict):
     with open(path, "a", encoding="utf-8") as f:
         f.write(json.dumps(data) + "\n")
-
-# ======================================================================
-# BACKGROUND WORKER
-# ======================================================================
 
 async def historical_processor_loop(
     alert_trigger_event,
@@ -55,7 +47,6 @@ async def historical_processor_loop(
             raw_lines = await asyncio.to_thread(read_and_clear_buffer, buffer_path)
             if not raw_lines:
                 continue
-
             accumulator = AlertGroupAccumulator()
 
             for line in raw_lines:
@@ -71,10 +62,6 @@ async def historical_processor_loop(
                     continue
 
                 accumulator.add(alert)
-
-                # Feed the raw event into temporal buckets regardless
-                # of dedup — we want accurate metric counts even for
-                # events whose alert fingerprint we've seen before.
                 ts = (
                     alert.get("timestamp")
                     or content.get("timestamp")
