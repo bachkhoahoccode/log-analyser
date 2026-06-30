@@ -12,7 +12,8 @@
     "/.git",
     "/.git/config",
     "/backup",
-    "/config.php"
+    "/config.php",
+    "/.aws/credentials"
   ],
 
   "risk": 15

@@ -1,11 +1,11 @@
+from dataclasses import dataclass
 from .metric import METRICS
-
+@dataclass
 class SecondBucket:
-    def __init__(self, timestamp = None):
-        self.timestamp = timestamp
+    timestamp: int = None
+    request_count: int = 0
+    total_bytes: int = 0
 
-        self.request_count = 0
-        self.total_bytes = 0
-        # create every metric automatically
+    def __post_init__(self):
         for metric in METRICS.values():
             setattr(self, metric.name, metric.factory())

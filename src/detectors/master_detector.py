@@ -6,7 +6,7 @@ from . import ALL_DETECTORS
 
 class MasterDetector:
 
-    def __init__(self, alert_trigger_event, buffer_file_path="reports/alerts/alerts_buffer.jsonl"):
+    def __init__(self, alert_trigger_event, buffer_file_path=None):
         self.event_detectors = []
         self.rollup_detectors = []
         self.event_busy = False  
@@ -88,6 +88,8 @@ class MasterDetector:
         self.alert_trigger_event.set()
 
     def _write_to_buffer(self, payload):
-        # A simple, lightning-fast JSON-Lines append operation
-        with open(self.buffer_file_path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(payload) + "\n")
+        if self.buffer_file_path is None:
+            return
+        else:
+            with open(self.buffer_file_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(payload) + "\n")

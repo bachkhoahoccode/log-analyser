@@ -1,19 +1,20 @@
 import json
 import os
 import streamlit as st
+from path_config import ConfigPaths
 
 # ======================================================================
 # HELPERS
 # ======================================================================
 
-def _load_available_formats(config_path: str = "config/regex_log_formats.json") -> dict:
+def _load_available_formats(config_path:str = ConfigPaths.log_formats) -> dict:
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
 
 
-def _save_formats(formats: dict, config_path: str = "config/regex_log_formats.json"):
+def _save_formats(formats: dict, config_path: str = ConfigPaths.log_formats):
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
     with open(config_path, "w", encoding="utf-8") as f:
         json.dump(formats, f, indent=4)
@@ -21,12 +22,21 @@ def _save_formats(formats: dict, config_path: str = "config/regex_log_formats.js
 
 def _dispatch_to_parser(uploaded_file, format_name: str) -> dict:
     from utils.process_batch_file import process_batch_file   
+    from path_config import StorageConfig
+    import re, time
+
+    slug = re.sub(r"[^a-z0-9]+", "_", uploaded_file.name.lower())[:40]
+    batch_storage = StorageConfig(mode="batch", session_id=f"{slug}_{int(time.time())}")
+    batch_storage.ensure_dirs()
+
     with st.spinner("Processing batch log files..."): 
         alerts, metrics = process_batch_file(uploaded_file, format_name)       
+    print(alerts, metrics)
     return {
         "metrics": metrics, 
         "alerts": alerts
     }
+    
 
 
 # ======================================================================
@@ -66,7 +76,7 @@ def render_file_loader():
         st.error("The uploaded file appears to be empty.")
         return
 
-    # ── Format detection ─────────────────────────────────────────────
+    # ── Format detection────────────────
     from utils.regex_helper import detect_log_format
     from utils.time_helper  import find_timestamp_format, KNOWN_FORMATS
     sample_line    = preview_lines[:10]
@@ -125,15 +135,12 @@ def render_file_loader():
                 )
             return
 
-    # ── Dispatch to real parser ───────────────────────────────────────
     if resolved_format:
         with st.spinner("Parsing and aggregating…"):
             result = _dispatch_to_parser(uploaded_file, resolved_format)
         st.session_state.batch_data = result
         st.rerun()
 
-
-    # ── Handle pending new-format registration ────────────────────────
     if "_pending_format" in st.session_state:
         with st.form("new_format_form"):
             st.info("Give this format layout a name to register it:")

@@ -1,16 +1,3 @@
-"""
-history_processor.py — Buffer reader, dedup gate, file writer,
-                        and temporal aggregation trigger.
-
-Responsibilities:
-  - Wait on alert_trigger_event
-  - Read and clear the buffer file
-  - Deduplicate across wake cycles
-  - Call risk_scoring to enrich each alert group
-  - Write enriched alerts to history_final.jsonl
-  - Feed raw events to TemporalAggregator for hourly/daily rollups
-"""
-
 import asyncio
 import json
 import os
@@ -18,13 +5,11 @@ import os
 from .risk_score import AlertGroupAccumulator, make_fingerprint
 from .temporal_aggregator import TemporalAggregator
 
-
 # ======================================================================
 # FILE HELPERS
 # ======================================================================
 
 def read_and_clear_buffer(path: str) -> list[str]:
-    """Read all lines from the buffer file and wipe it atomically."""
     if not os.path.exists(path) or os.path.getsize(path) == 0:
         return []
     with open(path, "r+", encoding="utf-8") as f:
@@ -35,10 +20,8 @@ def read_and_clear_buffer(path: str) -> list[str]:
 
 
 def append_to_history(path: str, data: dict):
-    """Append one enriched alert record to the permanent history file."""
     with open(path, "a", encoding="utf-8") as f:
         f.write(json.dumps(data) + "\n")
-
 
 # ======================================================================
 # BACKGROUND WORKER
@@ -46,11 +29,13 @@ def append_to_history(path: str, data: dict):
 
 async def historical_processor_loop(
     alert_trigger_event,
-    buffer_path:  str = "alerts_buffer.jsonl",
-    history_path: str = "history_final.jsonl",
-    hourly_path:  str = "history_hourly.jsonl",
-    daily_path:   str = "history_daily.jsonl",
+    buffer_path:  str = None,
+    history_path: str = None,
+    hourly_path:  str = None,
+    daily_path:   str = None,
 ):
+    if buffer_path is None:
+        reuturn
     print("[Processor] Active — sleeping until alert_trigger_event fires.")
 
     seen_fingerprints: set[str] = set()
@@ -101,8 +86,12 @@ async def historical_processor_loop(
             for enriched in accumulator.enriched_alerts():
                 fp = enriched["fingerprint"]
                 seen_fingerprints.add(fp)
-
-                await asyncio.to_thread(append_to_history, history_path, enriched)
+                if history_path is not None:
+                    await asyncio.to_thread(append_to_history, history_path, enriched)
+                if hourly_path is not None:                                     # add
+                    await asyncio.to_thread(append_to_history, hourly_path, enriched)
+                if daily_path is not None:                                      # add
+                    await asyncio.to_thread(append_to_history, daily_path, enriched)
                 print(
                     f"  [Processor] Saved: {fp} | "
                     f"occurrences={enriched['occurrence_count']} | "
@@ -131,7 +120,12 @@ async def historical_processor_loop(
                 temporal.ingest(content, float(ts))
 
         for enriched in flush_acc.enriched_alerts():
-            append_to_history(history_path, enriched)
+            if history_path is not None:                                    # add
+                append_to_history(history_path, enriched)
+            if hourly_path is not None:                                     # add
+                append_to_history(hourly_path, enriched)
+            if daily_path is not None:                                      # add
+                append_to_history(daily_path, enriched)
 
         # Flush any open hourly/daily buckets to disk
         temporal.flush_all()

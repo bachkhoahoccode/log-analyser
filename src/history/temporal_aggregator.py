@@ -18,11 +18,9 @@ class _ResolutionAggregator:
     def __init__(self, key_fn, output_path: str):
         self._key_fn     = key_fn          # ts -> bucket key string
         self._output_path = output_path
-
         self._current_key: str | None = None
         self._bucket: dict = {}            # metric_name -> defaultdict
 
-    # ------------------------------------------------------------------
     def ingest(self, event: dict, ts: float):
 
         bucket_key = self._key_fn(ts)
@@ -85,8 +83,8 @@ class _ResolutionAggregator:
 class TemporalAggregator:
     def __init__(
         self,
-        hourly_path: str = "history_hourly.jsonl",
-        daily_path:  str = "history_daily.jsonl",
+        hourly_path: str = None,
+        daily_path:  str = None,
     ):
         self._hourly = _ResolutionAggregator(_hour_key, hourly_path)
         self._daily  = _ResolutionAggregator(_day_key,  daily_path)

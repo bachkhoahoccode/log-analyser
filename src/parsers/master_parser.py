@@ -5,6 +5,7 @@ from src.detectors.master_detector import MasterDetector
 import json
 from .regex_parser import RegexParser
 import asyncio
+from path_config import ConfigPaths
 
 class BaseParser(ABC):    
     def __init__(self, spec):
@@ -19,7 +20,7 @@ class ParserFactory:
     @classmethod
     def formats(cls):
         if cls._formats is None:
-            with open("config/regex_log_formats.json", "r") as f:
+            with open(ConfigPaths.log_formats, "r") as f:
                 cls._formats = json.load(f)
         return cls._formats
 
@@ -104,7 +105,7 @@ def build(event):
 
 if __name__ == "__main__":
     try:
-        with open("data/regex_log_formats.json", "r") as config_file:
+        with open(ConfigPaths.log_formats, "r") as config_file:
             RLOG_FORMATS = json.load(config_file)
     except FileNotFoundError:
         RLOG_FORMATS = {}

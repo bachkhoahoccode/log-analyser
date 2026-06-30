@@ -3,6 +3,8 @@ from collections import deque
 import streamlit as st
 
 # Custom module injections
+from pathlib import Path
+from path_config import StorageConfig
 from utils.listener import LogListener
 from indexer.aggregator import AggregatorCache
 from parsers.master_parser import MasterParser
@@ -41,9 +43,22 @@ listener_to_parser_queue = asyncio.Queue()
 parser_to_cache_queue    = asyncio.Queue()
 shared_alert_event       = asyncio.Event()
 
+def _read_jsonl_history(path: str | None) -> list[dict]:
+    """Read a JSONL history file into a list of dicts. Returns [] if missing/None."""
+    if not path or not Path(path).exists():
+        return []
+    snapshots = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                snapshots.append(json.loads(line))
+    return snapshots
 
 async def launch_system():
-    detector_instance = MasterDetector(alert_trigger_event=shared_alert_event)
+    live_storage = StorageConfig(mode="live")
+
+    detector_instance = MasterDetector(alert_trigger_event=shared_alert_event, buffer_file_path=str(live_storage.alerts_buffer))
     target_path       = st.session_state.app_config.get("log_sources")
     listener          = LogListener(target_path, listener_to_parser_queue)
     formats           = listener.formats
@@ -51,14 +66,15 @@ async def launch_system():
         formats, listener_to_parser_queue, parser_to_cache_queue,
         detector=detector_instance,
     )
-    cache = AggregatorCache(parser_to_cache_queue, detector=detector_instance)
+    cache = AggregatorCache(parser_to_cache_queue, detector=detector_instance, history_path=live_storage.metrics_history)
     await asyncio.gather(
         listener.start_live_listening(),
         parser.parse_logs(),
         cache.ingest_event(ROLLING_WINDOW_SIZE),
-        historical_processor_loop(alert_trigger_event=shared_alert_event),
+        historical_processor_loop(alert_trigger_event=shared_alert_event,
+            buffer_path=str(live_storage.alerts_buffer),
+            history_path=str(live_storage.alerts_history)),
     )
-
 
 # =====================================================================
 # SIDEBAR
@@ -67,8 +83,10 @@ def build_sidebar():
     st.sidebar.title("🛡️ SOC Aggregator")
     st.session_state.current_tab = st.sidebar.radio(
         "Mode",
-        ["Live Dashboard", "Batch Dashboard"],
-        index=0 if st.session_state.current_tab == "Live Dashboard" else 1,
+        ["Live Dashboard", "Batch Dashboard", "Historical Trends"],
+        index=["Live Dashboard", "Batch Dashboard", "Historical Trends"].index(
+            st.session_state.current_tab
+        ),
     )
     st.sidebar.markdown("---")
     render_sidebar()   # ⚙️ settings modal button lives here
@@ -124,7 +142,32 @@ def render_batch_tab():
     batch_alerts  = st.session_state.batch_data.get("alerts",  [])
     render_charts(batch_metrics, batch_alerts)
 
-
+# =====================================================================
+# HISTORICAL TRENDS TAB  (hourly / daily rollups)
+# =====================================================================
+def render_historical_tab():
+    st.title("📅 Historical Trends — Hourly & Daily Rollups")
+    st.caption("Reads from the hourly/daily history files written by historical_processor_loop.")
+ 
+    storage = st.session_state.get("storage_paths", {})
+    hourly_path = storage.get("hourly_path")
+    daily_path  = storage.get("daily_path")
+ 
+    period = st.radio("Granularity", ["Hourly", "Daily"], horizontal=True)
+    path   = hourly_path if period == "Hourly" else daily_path
+ 
+    snapshots = _read_jsonl_history(path)
+    alerts_in_history = [s for s in snapshots if s.get("type")]  # enriched alert records
+ 
+    if not snapshots:
+        st.info(
+            f"No {period.lower()} history file configured or it's still empty. "
+            "Make sure hourly_path / daily_path are passed into historical_processor_loop."
+        )
+        return
+ 
+    render_charts(snapshots, alerts_in_history)
+ 
 # =====================================================================
 # MAIN
 # =====================================================================
@@ -138,8 +181,10 @@ def run_ui():
 
     if st.session_state.current_tab == "Live Dashboard":
         render_live_tab()
-    else:
+    elif st.session_state.current_tab == "Batch Dashboard":
         render_batch_tab()
+    else:
+        render_historical_tab()
 
 
 if __name__ == "__main__":

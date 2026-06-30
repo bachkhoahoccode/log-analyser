@@ -6,7 +6,7 @@ from detectors.master_detector import MasterDetector
 from indexer.metric import METRICS
 
 def process_batch_file(uploaded_file, format):
-    detector = MasterDetector(None, "data/batch.jsonl")
+    detector = MasterDetector(None)
     parser = ParserFactory.create(format)
     cache = AggregatorCache([], detector)
     uploaded_file.seek(0)
@@ -24,12 +24,12 @@ def process_batch_file(uploaded_file, format):
         for detective in detector.event_detectors:
             event_alert = detective.detect(parsed)
             if event_alert: alerts += event_alert
-        roll_alert, roll_metrics = ingest_event(cache, parsed)
+        roll_alert, roll_metrics = process_event(cache, parsed)
         if roll_alert: alerts += roll_alert
-        if roll_metrics: metrics.append(roll_metrics)
-    return metrics, alerts
+        if roll_metrics: metrics.append(vars(roll_metrics))   # SecondBucket → plain dict
+        return {"metrics": metrics, "alerts": alerts}
 
-def ingest_event(cache, tsevent):
+def process_event(cache, tsevent):
     event_sec = tsevent[0]
     event = build(tsevent)
     alerts = []
