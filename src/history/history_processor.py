@@ -27,7 +27,7 @@ async def historical_processor_loop(
     daily_path:   str = None,
 ):
     if buffer_path is None:
-        reuturn
+        return
     print("[Processor] Active — sleeping until alert_trigger_event fires.")
 
     seen_fingerprints: set[str] = set()

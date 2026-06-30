@@ -42,7 +42,7 @@ class MasterParser:
         for format in format_names:
             self.parsers[format] = ParserFactory.create(format)
     async def parse_logs(self):
-        while self.queue:
+        while self.inqueue:
             line = await self.inqueue.get()
             format = line["format"]
             content = line["raw_line"]

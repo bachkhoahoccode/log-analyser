@@ -70,7 +70,7 @@ class _ResolutionAggregator:
         """Serialise the closed bucket and append it to the output file."""
         record = {
             "bucket":      bucket_key,
-            "flushed_at":  datetime.isoformat(),
+            "flushed_at":  datetime.now(timezone.utc).isoformat(),
             "metrics":     _serialise_bucket(self._bucket),
         }
         os.makedirs(os.path.dirname(self._output_path) or ".", exist_ok=True)

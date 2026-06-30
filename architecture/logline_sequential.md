@@ -39,11 +39,11 @@ sequenceDiagram
 
     MP->>RX: parse_line(raw_line)
 
-    RX-->>MP: event dict { ip, path, status, bytes, ... }
+    RX-->>MP: (timestamp, event_dict) tuple
 
     par Event detection (async task)
 
-        MP->>MD: detect_event_if_idle(event)
+        MP->>MD: detect_event_if_idle(list(raw_event))
 
         MD->>MD: run sus_uri + xss detectors
 
@@ -51,7 +51,7 @@ sequenceDiagram
 
     and Bucket build + queue
 
-        MP->>MP: build SecondBucket from event
+        MP->>MP: build(raw_event) → SecondBucket
 
         MP->>Q2: put(SecondBucket)
 

@@ -9,7 +9,7 @@ from dashboard.charts import render_charts          # ← shared chart engine
 from dashboard.file_loader import render_file_loader
 
 # =====================================================================
-# PAGE CONFIG  (must be first Streamlit call)
+# PAGE CONFIG
 # =====================================================================
 st.set_page_config(page_title="Log Analytics Engine", page_icon="🛡️", layout="wide")
 
@@ -25,20 +25,11 @@ if "app_config" not in st.session_state:
 if "current_tab" not in st.session_state:
     st.session_state.current_tab = "Live Dashboard"
 
-# batch_data holds either None (no file loaded) or the aggregated metrics
-# dict returned by your real parser — same shape charts.py expects.
 if "batch_data" not in st.session_state:
-    st.session_state.batch_data = None     # {"metrics": {...}, "alerts": [...]}
+    st.session_state.batch_data = None
 
 ROLLING_WINDOW_SIZE = st.session_state.app_config.get("rolling_window_size", 300)
 sliding_window = deque(maxlen=ROLLING_WINDOW_SIZE)
-
-# NOTE: the live pipeline (listener → parser → aggregator → detector →
-# history processor) no longer runs inside this Streamlit script. It runs
-# as a separate process — see run_live_pipeline.py. Streamlit cannot host
-# an infinite asyncio.gather() loop without freezing the page on every
-# rerun, so the dashboard below just polls the files that process writes.
-
 
 def _read_jsonl_history(path) -> list[dict]:
     """Read a JSONL history file into a list of dicts. Returns [] if missing/None."""
@@ -74,8 +65,7 @@ def build_sidebar():
 def render_live_tab():
     st.title("🔴 Live Streaming Telemetry Engine")
     st.caption(
-        "Reads from data/live/*.jsonl, written by run_live_pipeline.py "
-        "(run that script separately — it does not run inside Streamlit)."
+        "Reads from data/live/*.jsonl"
     )
 
     live_storage = StorageConfig(mode="live")
@@ -92,7 +82,7 @@ def render_live_tab():
 
     if not live_metrics:
         st.info(
-            "No live data yet. Make sure run_live_pipeline.py is running "
+            "No live data yet. Make sure live_bg_pipeline.py is running "
             f"in a separate terminal, and writing to {live_storage.base_dir}."
         )
         return
@@ -131,7 +121,7 @@ def render_batch_tab():
 # =====================================================================
 def render_historical_tab():
     st.title("📅 Historical Trends — Hourly & Daily Rollups")
-    st.caption("Reads from the hourly/daily history files written by run_live_pipeline.py.")
+    st.caption("Reads from the hourly/daily history files written by live_bg_pipeline.py.")
 
     live_storage = StorageConfig(mode="live")
 
@@ -144,7 +134,7 @@ def render_historical_tab():
     if not snapshots:
         st.info(
             f"No {period.lower()} history yet at {path}. "
-            "Make sure run_live_pipeline.py is running."
+            "Make sure live_bg_pipeline.py is running."
         )
         return
 
