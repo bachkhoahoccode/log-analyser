@@ -21,13 +21,15 @@ def process_batch_file(uploaded_file, format):
         if not line.strip():
             continue
         parsed = parser.parse_line(line)#parsed is tuple
-        for detective in detector.event_detectors:
-            event_alert = detective.detect(parsed)
-            if event_alert: alerts += event_alert
-        roll_alert, roll_metrics = process_event(cache, parsed)
-        if roll_alert: alerts += roll_alert
-        if roll_metrics: metrics.append(vars(roll_metrics))   # SecondBucket → plain dict
-        return {"metrics": metrics, "alerts": alerts}
+        if isinstance(parsed, tuple):
+            for detective in detector.event_detectors:
+                event_alert = detective.detect(parsed)
+                if event_alert: alerts += event_alert
+            roll_alert, roll_metrics = process_event(cache, parsed)
+            if roll_alert: alerts += roll_alert
+            if roll_metrics: metrics.append(vars(roll_metrics))   # SecondBucket → plain dict
+        else: continue
+    return metrics, alerts
 
 def process_event(cache, tsevent):
     event_sec = tsevent[0]

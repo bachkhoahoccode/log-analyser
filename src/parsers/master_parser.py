@@ -25,7 +25,7 @@ class ParserFactory:
         return cls._formats
 
     @classmethod
-    def create(cls, format_name):  # Truyền cấu hình vào đây
+    def create(cls, format_name):
         spec = cls.formats().get(format_name)
         if spec is None:
             raise ValueError(f"Unknown format: {format_name}")
