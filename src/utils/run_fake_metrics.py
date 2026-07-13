@@ -1,10 +1,3 @@
-"""
-run_fake_metrics.py — smoke-test charts.py with realistic fake data.
-
-Usage (from the src/ directory):
-    streamlit run run_fake_metrics.py
-"""
-
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -13,7 +6,7 @@ from datetime import datetime, timezone
 
 st.set_page_config(page_title="Charts smoke-test", page_icon="🧪", layout="wide")
 
-# ── Fake metrics dict (matches what charts.py calls .get() on) ────────
+# ── Fake metrics dict────────
 
 fake_metrics = {
     "timestamp": int(datetime.now(timezone.utc).timestamp()),
@@ -128,7 +121,7 @@ fake_metrics = {
     },
 }
 
-# ── Fake alerts list (matches what charts.py calls .get() on per alert) 
+# ── Fake alerts list
 
 fake_alerts = [
     {

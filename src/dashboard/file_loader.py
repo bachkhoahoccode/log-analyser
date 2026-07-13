@@ -13,12 +13,10 @@ def _load_available_formats(config_path:str = ConfigPaths.log_formats) -> dict:
             return json.load(f)
     return {}
 
-
 def _save_formats(formats: dict, config_path: str = ConfigPaths.log_formats):
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
     with open(config_path, "w", encoding="utf-8") as f:
         json.dump(formats, f, indent=4)
-
 
 def _dispatch_to_parser(uploaded_file, format_name: str) -> dict:
     from utils.process_batch_file import process_batch_file   
@@ -37,8 +35,6 @@ def _dispatch_to_parser(uploaded_file, format_name: str) -> dict:
         "alerts": alerts
     }
     
-
-
 # ======================================================================
 # PUBLIC ENTRY POINT
 # ======================================================================
@@ -46,23 +42,18 @@ def _dispatch_to_parser(uploaded_file, format_name: str) -> dict:
 def render_file_loader():
     st.title("📂 Historical Batch File Loader")
     st.write("Upload an offline log file to run it through the aggregation engine.")
-
     formats_dict   = _load_available_formats()
     format_options = ["Auto-Detect & Verify"] + list(formats_dict.keys())
-
     uploaded_file  = st.file_uploader(
-        "Drop your log file here (.txt, .csv, .log, .jsonl)",
         type=["txt", "csv", "log", "jsonl"],
     )
     selected_format = st.selectbox("Expected log format:", options=format_options)
-
     if uploaded_file is None:
         return
-
     if not st.button("Validate & Process", type="primary"):
         return
 
-    # ── Read preview lines for format detection ──────────────────────
+    # Read preview lines for format detection
     uploaded_file.seek(0)
     preview_lines = []
     for _ in range(10):
@@ -71,12 +62,11 @@ def render_file_loader():
             break
         preview_lines.append(line_bytes.decode("utf-8", errors="ignore").strip())
     uploaded_file.seek(0)   # reset for the real parse
-
     if not preview_lines:
         st.error("The uploaded file appears to be empty.")
         return
 
-    # ── Format detection────────────────
+    # Format detection
     from utils.regex_helper import detect_log_format
     from utils.time_helper  import find_timestamp_format, KNOWN_FORMATS
     sample_line    = preview_lines[:10]
@@ -110,7 +100,7 @@ def render_file_loader():
             return
 
     else:
-        # Auto-detect: try to match against known formats
+        # Auto-detect
         cfg = formats_dict[detected_format]
         if cfg.get("time_format") == detected_time:
             st.success(f"✅ Auto-detected format: '{detected_format}'")

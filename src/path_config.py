@@ -28,7 +28,7 @@ class StorageConfig:
         return self.base_dir / "metrics_history.jsonl"
     @property
     def log_formats_config(self) -> Path:
-        return Path("config/regex_log_formats.json")  # single source of truth
+        return Path("config/regex_log_formats.json") 
     def ensure_dirs(self):
         self.base_dir.mkdir(parents=True, exist_ok=True)
  

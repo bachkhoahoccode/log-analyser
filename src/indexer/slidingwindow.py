@@ -6,7 +6,7 @@ from .metric import METRICS
 class SlidingWindowTracker:
     def __init__(self, window_seconds: int, export_history :bool = False):
         self.window_seconds = window_seconds
-        # This tracker maintains its own private history segment
+        # maintains its own private history segment
         self.history = deque(maxlen=window_seconds)
         self.export_history = export_history
         self.summary = SecondBucket()

@@ -30,7 +30,7 @@ def _load_config(filename: str) -> dict:
     try:
         with open(filepath, "r") as f:
             data = json.load(f)
-        st.session_state.app_config          = data
+        st.session_state.app_config = data
         st.session_state.current_config_file = filename
         return data
     except (json.JSONDecodeError, FileNotFoundError):
@@ -60,7 +60,7 @@ def _settings_dialog():
         key="_settings_profile_select",
     )
 
-    # Reload config when the user switches profiles (without saving first)
+    # Reload config if a different profile is selected
     if selected_file != st.session_state.current_config_file:
         _load_config(selected_file)
         st.rerun()
@@ -70,12 +70,10 @@ def _settings_dialog():
     st.subheader("Parameters")
 
     updated: dict = {}
-
     # Group parameters into two columns for a cleaner settings feel
     keys  = list(cfg.keys())
     left_keys  = keys[:len(keys)//2 + len(keys) % 2]
     right_keys = keys[len(keys)//2 + len(keys) % 2:]
-
     col_l, col_r = st.columns(2)
 
     for col, col_keys in ((col_l, left_keys), (col_r, right_keys)):
@@ -100,7 +98,7 @@ def _settings_dialog():
 
     st.divider()
 
-    # ── Action row ───────────────────────────────────────────────────
+    # ── Action row ──────────
     btn_save, btn_cancel = st.columns([1, 1])
 
     with btn_save:
@@ -112,7 +110,7 @@ def _settings_dialog():
 
     with btn_cancel:
         if st.button("✕ Cancel", use_container_width=True):
-            st.rerun()   # just closes the dialog
+            st.rerun()   # closes the dialog
 
 def render_sidebar():
     with st.sidebar:

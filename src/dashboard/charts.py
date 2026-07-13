@@ -25,11 +25,11 @@ def render_charts(metrics: list[dict], alerts: list[dict]):
     st.markdown("---")
     _render_alert_queue(alerts)
     st.markdown("---")
-    _render_metric_charts(latest)          # per-IP/per-URI charts: latest snapshot only
+    _render_metric_charts(latest)          # per-IP/per-URI charts
     st.markdown("---")
-    _render_investigation_tables(latest)   # drill-down tables: latest snapshot only
+    _render_investigation_tables(latest)   # drill-down tables
     st.markdown("---")
-    _render_time_series(metrics)           # new: multi-chart grid over time
+    _render_time_series(metrics)           # multi-chart grid over time
 
 
 # ======================================================================
@@ -73,7 +73,6 @@ def _metrics_to_dataframe(metrics: list[dict], keys: list[str]) -> pd.DataFrame:
         rows.append(row)
     return pd.DataFrame(rows)
 
-
 # ======================================================================
 # SECTION: KPI ROW
 # ======================================================================
@@ -100,7 +99,6 @@ def _render_kpi_row(summed: dict, latest: dict, alerts: list):
     if ts:
         readable = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
         st.caption(f"Latest snapshot timestamp: {readable}")
-
 
 # ======================================================================
 # SECTION: ALERT QUEUE  (unchanged — alerts shape didn't change)
@@ -143,7 +141,6 @@ def _render_alert_queue(alerts: list):
             """,
             unsafe_allow_html=True,
         )
-
 
 # ======================================================================
 # SECTION: METRIC CHARTS  (latest snapshot only, per product decision)
@@ -244,13 +241,10 @@ def _render_investigation_tables(latest: dict):
         ]
         st.dataframe(pd.DataFrame(rows) if rows else pd.DataFrame(), use_container_width=True)
 
-
 # ======================================================================
 # SECTION: TIME SERIES  (new — multi-chart grid, one chart per metric)
 # ======================================================================
 
-# Key metrics charted over time. Dict-valued metrics are summed to a
-# single number per snapshot (e.g. total failed logins across all IPs).
 _TIME_SERIES_KEYS = [
     "request_count",
     "total_bytes",
@@ -276,9 +270,7 @@ def _render_time_series(metrics: list[dict]):
         st.info("Need at least 2 snapshots to draw a trend. Currently have "
                 f"{len(metrics)}.")
         return
-
     df = _metrics_to_dataframe(metrics, _TIME_SERIES_KEYS)
-
     cols = st.columns(2)
     for i, key in enumerate(_TIME_SERIES_KEYS):
         with cols[i % 2]:

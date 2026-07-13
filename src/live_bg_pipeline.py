@@ -17,7 +17,7 @@ listener_to_parser_queue = asyncio.Queue()
 parser_to_cache_queue    = asyncio.Queue()
 shared_alert_event       = asyncio.Event()
 
-ROLLING_WINDOW_SIZE = 300  # keep in sync with app_config default in app.py
+ROLLING_WINDOW_SIZE = 300
 
 
 def _load_log_sources() -> list[dict]:

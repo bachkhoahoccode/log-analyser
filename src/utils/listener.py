@@ -14,7 +14,6 @@ class LogListener:
     async def start_live_listening(self):
         print("[Listener] 🎬 Live tracking started for configured files...")
         
-        # Initialize file positions to the current END of the file (or 0 if you want to read from start)
         for config in self.file_configs:
             path = config["log_file_path"]
             if os.path.exists(path):
@@ -26,34 +25,29 @@ class LogListener:
         while self.is_running:
             for config in self.file_configs:
                 path = config["log_file_path"]
-                file_format = config.get("format", "unknown")
-                
+                file_format = config.get("format", "unknown")        
                 if not os.path.exists(path):
                     continue
                 
                 current_size = os.path.getsize(path)
                 last_position = self.file_positions.get(path, 0)
                 
-                # Check if the file has grown (latest bit arrived!)
+                # Check if file has grown
                 if current_size > last_position:
                     await self._read_latest_bit(path, last_position, file_format)
                     self.file_positions[path] = current_size # Update pointer
-
             await asyncio.sleep(1)
 
     async def _read_latest_bit(self, path, start_bytes, file_format):
-        # Open, jump to where we left off, read the new segment, and close
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             f.seek(start_bytes)
             new_lines = f.readlines()
-            
             for line in new_lines:
                 clean_line = line.strip()
                 if clean_line:
-                    # Package the line with its format metadata attached!
+                    # format metadata
                     payload = {
                         "raw_line": clean_line,
                         "format": file_format,
                     }
-                    # 🚀 Conveyor Belt: Feed it directly into the Parser queue
                     await self.queue.put(payload)

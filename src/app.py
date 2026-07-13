@@ -5,7 +5,7 @@ import streamlit as st
 
 from path_config import StorageConfig
 from dashboard.config_sidebar import render_sidebar
-from dashboard.charts import render_charts          # ← shared chart engine
+from dashboard.charts import render_charts
 from dashboard.file_loader import render_file_loader
 
 # =====================================================================
@@ -28,11 +28,14 @@ if "current_tab" not in st.session_state:
 if "batch_data" not in st.session_state:
     st.session_state.batch_data = None
 
+if "sliding_window" not in st.session_state:
+    st.session_state.sliding_window = deque(maxlen=st.session_state.app_config.get("rolling_window_size", 300))
+
+sliding_window = st.session_state.sliding_window
 ROLLING_WINDOW_SIZE = st.session_state.app_config.get("rolling_window_size", 300)
-sliding_window = deque(maxlen=ROLLING_WINDOW_SIZE)
 
 def _read_jsonl_history(path) -> list[dict]:
-    """Read a JSONL history file into a list of dicts. Returns [] if missing/None."""
+#Read a JSONL history file into a list of dicts. Returns [] if missing
     if not path or not Path(path).exists():
         return []
     snapshots = []
@@ -56,7 +59,7 @@ def build_sidebar():
         ),
     )
     st.sidebar.markdown("---")
-    render_sidebar()   # ⚙️ settings modal button lives here
+    render_sidebar()
 
 
 # =====================================================================
@@ -95,12 +98,11 @@ def render_live_tab():
 # BATCH TAB
 # =====================================================================
 def render_batch_tab():
-    # ── No file loaded yet ──────────────────────────────────────────
+
     if st.session_state.batch_data is None:
         render_file_loader()
         return
 
-    # ── File loaded — show analytics ────────────────────────────────
     st.title("📊 Historical Batch Analytics")
 
     col_back, _ = st.columns([1.5, 4.5])
@@ -111,7 +113,6 @@ def render_batch_tab():
 
     st.markdown("---")
 
-    # batch_data is {"metrics": list<aggregated dict>, "alerts": <list>}
     batch_metrics = st.session_state.batch_data.get("metrics", [])
     batch_alerts  = st.session_state.batch_data.get("alerts",  [])
     render_charts(batch_metrics, batch_alerts)

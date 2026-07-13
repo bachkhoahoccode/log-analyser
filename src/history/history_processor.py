@@ -33,7 +33,7 @@ async def historical_processor_loop(
     seen_fingerprints: set[str] = set()
 
     # One TemporalAggregator lives for the lifetime of this coroutine
-    # so buckets accumulate correctly across multiple wake cycles.
+    # buckets accumulate correctly across multiple wake cycles.
     temporal = TemporalAggregator(
         hourly_path=hourly_path,
         daily_path=daily_path,
@@ -75,9 +75,9 @@ async def historical_processor_loop(
                 seen_fingerprints.add(fp)
                 if history_path is not None:
                     await asyncio.to_thread(append_to_history, history_path, enriched)
-                if hourly_path is not None:                                     # add
+                if hourly_path is not None:
                     await asyncio.to_thread(append_to_history, hourly_path, enriched)
-                if daily_path is not None:                                      # add
+                if daily_path is not None:
                     await asyncio.to_thread(append_to_history, daily_path, enriched)
                 print(
                     f"  [Processor] Saved: {fp} | "
@@ -107,13 +107,12 @@ async def historical_processor_loop(
                 temporal.ingest(content, float(ts))
 
         for enriched in flush_acc.enriched_alerts():
-            if history_path is not None:                                    # add
+            if history_path is not None:
                 append_to_history(history_path, enriched)
-            if hourly_path is not None:                                     # add
+            if hourly_path is not None:
                 append_to_history(hourly_path, enriched)
-            if daily_path is not None:                                      # add
+            if daily_path is not None:
                 append_to_history(daily_path, enriched)
 
-        # Flush any open hourly/daily buckets to disk
         temporal.flush_all()
         print("[Processor] Buffer and temporal buckets flushed. Engine offline.")

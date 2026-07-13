@@ -6,18 +6,17 @@ from .secondbucket import SecondBucket
 from src.detectors.master_detector import MasterDetector
 from path_config import ConfigPaths, StorageConfig
 
-try:
-    with open (ConfigPaths.system, 'r') as s:
-        system = json.load(s)
-        WINDOWS = system.get("window")
-        MAX_WINDOW = int(WINDOWS.get("max window"))
-        LADDER_EXPORT_INTERVAL = int(system["storage"].get("ladder_export_interval"))
-except FileNotFoundError:
-    WINDOWS = {}
-    LADDER_EXPORT_INTERVAL = 0
-
 class AggregatorCache:
     def __init__(self, inqueue, detector: MasterDetector, history_path = None):
+        try:
+            with open (ConfigPaths.system, 'r') as s:
+                system = json.load(s)
+                WINDOWS = system.get("window")
+                #MAX_WINDOW = int(WINDOWS.get("max window"))
+                self.LADDER_EXPORT_INTERVAL = int(system["storage"].get("ladder_export_interval"))
+        except FileNotFoundError:
+            WINDOWS = {}
+            self.LADDER_EXPORT_INTERVAL = 0
         self.current_event_time = 0
         self.current_bucket = None
         self.detector = detector
@@ -29,7 +28,7 @@ class AggregatorCache:
         }
         self.history_path = history_path
     async def ingest_event(self, max_window):
-        while self.inqueue:
+        while True:
             event = await self.inqueue.get()
             event_sec = event.timestamp
 
@@ -57,9 +56,9 @@ class AggregatorCache:
                             break
     
     def _rollup_to_all_windows(self, closed_bucket):
-        for window_name, window_tracker in self.windows.items():
+        for _, window_tracker in self.windows.items():
             window_tracker.update_on_rollup(closed_bucket)
-        if closed_bucket.timestamp % LADDER_EXPORT_INTERVAL == 0 and self.history_path is not None:
+        if closed_bucket.timestamp % self.LADDER_EXPORT_INTERVAL == 0 and self.history_path is not None:
             self._write_window_to_history()
 
     def aggregate(self, bucket, event):

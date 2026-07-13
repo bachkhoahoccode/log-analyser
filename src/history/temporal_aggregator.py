@@ -3,7 +3,7 @@ import os
 from collections import defaultdict
 from datetime import datetime, timezone
 
-from indexer.metric import METRICS   # your existing Metric registry
+from indexer.metric import METRICS 
 
 def _hour_key(ts: float) -> str:
     dt = datetime.fromtimestamp(ts, tz=timezone.utc)
@@ -55,7 +55,7 @@ class _ResolutionAggregator:
                 metric.aggregate_metric(self._bucket[name], src)
 
             elif metric.method == "nested":
-                # extractor returns (outer_key, inner_key, value)
+                # returns (outer_key, inner_key, value)
                 if len(extracted) == 3:
                     outer_key, inner_key, value = extracted
                 else:
@@ -67,7 +67,7 @@ class _ResolutionAggregator:
                 metric.aggregate_metric(self._bucket[name], src)
 
     def _flush(self, bucket_key: str):
-        """Serialise the closed bucket and append it to the output file."""
+        #Serialise the closed bucket
         record = {
             "bucket":      bucket_key,
             "flushed_at":  datetime.now(timezone.utc).isoformat(),
